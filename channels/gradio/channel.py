@@ -76,7 +76,7 @@ class GradioChannel(Channel):
     def __on_prompt_template_change(self, prompt_choice):
         if not isinstance(prompt_choice, str):
             return
-        return self.prompt_templates[prompt_choice]
+        return self.prompt_templates.get(prompt_choice, '')
 
     def __submit_message(self, prompt, prompt_choice, temperature, max_tokens, state):
         history = state['chat_records']
@@ -85,7 +85,7 @@ class GradioChannel(Channel):
                 (history[i]['content'], history[i + 1]['content']) for i in
                 range(0, len(history) - 1, 2)], f"Total tokens used: {state['total_tokens']} / 4096", state
 
-        prompt_template = self.prompt_templates[prompt_choice]
+        prompt_template = self.prompt_templates.get(prompt_choice, '')
 
         system_prompt = []
         if prompt_template:
@@ -94,11 +94,15 @@ class GradioChannel(Channel):
         prompt_msg = {"role": "user", "content": prompt}
 
         try:
+            _before = arrow.now().float_timestamp
+            logger.debug(f'start of ChatCompletion, time={_before}')
             completion = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=system_prompt + history + [prompt_msg],
                 temperature=temperature, max_tokens=max_tokens
             )
+            _after = arrow.now().float_timestamp
+            logger.debug(f'end of ChatCompletion, time={_after}, used={_after - _before}')
             history.append(prompt_msg)
             history.append(completion.choices[0].message.to_dict())
             state['total_tokens'] += completion['usage']['total_tokens']
