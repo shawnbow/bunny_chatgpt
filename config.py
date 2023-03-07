@@ -58,10 +58,10 @@ class Config:
         return cls.get('openai', {}).get(key, None)
 
     @classmethod
-    def dt(cls, key=None):
+    def gradio(cls, key=None):
         if not key:
-            return cls.get('dt', {})
-        return cls.get('dt', {}).get(key, None)
+            return cls.get('gradio', {})
+        return cls.get('gradio', {}).get(key, None)
 
 
 Config.load()

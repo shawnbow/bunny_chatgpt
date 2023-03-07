@@ -25,18 +25,15 @@
       "token_expires": 3600
     }
   },
-  "dt": {
-    "admin_user_id": "",
+  "gradio": {
     "server_url": "/",
-    "server_port": "80",
-    "agent_id": "YOUR AgentId",
-    "app_key": "YOUR AppKey",
-    "app_secret": "YOUR AppSecret"
+    "server_port": "80"
   },
   "openai": {
     "api_key": "YOUR API KEY",
     "api_base": null,
     "use_proxy": false,
+    "prompt_url": "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
     "retry_times": 2,
     "retry_interval": 3,
     "cmd_prefix": ["/", "cmd", "执行"],
