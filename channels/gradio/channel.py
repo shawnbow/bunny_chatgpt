@@ -15,6 +15,13 @@ from typing import List, Tuple, Dict, Generator
 import openai
 import gradio as gr
 
+openai.api_key = Config.openai('api_key')
+if Config.openai('use_proxy') and Config.proxy():
+    openai.proxy = Config.proxy()
+
+if Config.openai('api_base'):
+    openai.api_base = Config.openai('api_base')
+
 
 class GradioChannel(Channel):
     prompt_templates = {"Default Prompt": ""}
@@ -31,7 +38,7 @@ class GradioChannel(Channel):
 
     def __init__(self):
         self.demo = self.__build_blocks()
-        self.demo.queue()
+        # self.demo.queue()
 
     @property
     def server(self):
