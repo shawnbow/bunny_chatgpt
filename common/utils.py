@@ -63,6 +63,10 @@ class Fetcher:
     proxies = {'http': Config.proxy(), 'https': Config.proxy()} if Config.proxy() else None
 
     @classmethod
+    def get(cls, url, params=None, **kwargs):
+        return requests.get(url, params=params, proxies=cls.proxies, **kwargs)
+
+    @classmethod
     def fetch_file_data(cls, url, retry_count=0) -> (io.BytesIO, str, str):
         try:
             response = requests.get(url, stream=True, proxies=cls.proxies)

@@ -63,7 +63,7 @@ class GradioChannel(Channel):
 
     def __download_prompt_templates(self):
         data, _, _ = Fetcher.fetch_file_data(Config.openai('prompt_url'))
-        df = pd.read_csv(data)
+        df = pd.read_csv('prompts.csv', sep=',', error_bad_lines=False)
         for i in df.index:
             # update global state prompt_templates
             self.prompt_templates[df.at[i, 'act']] = df.at[i, 'prompt']
