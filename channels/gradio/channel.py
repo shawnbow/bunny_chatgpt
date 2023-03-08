@@ -23,8 +23,17 @@ if Config.openai('api_base'):
     openai.api_base = Config.openai('api_base')
 
 
+def _download_prompt_templates():
+    ret = {'Default Prompt': ''}
+    data, _, _ = Fetcher.fetch_file_data(Config.openai('prompt_url'))
+    df = pd.read_csv(data, sep=',', on_bad_lines='skip')
+    for i in df.index:
+        ret[df.at[i, 'act']] = df.at[i, 'prompt']
+    return ret
+
+
 class GradioChannel(Channel):
-    prompt_templates = {"Default Prompt": ""}
+    prompt_templates = _download_prompt_templates()
 
     css = """
           #col-container {max-width: 80%; margin-left: auto; margin-right: auto;}
@@ -60,15 +69,6 @@ class GradioChannel(Channel):
             'chat_records': [],
             'image_records': [],
         }
-
-    def __download_prompt_templates(self):
-        data, _, _ = Fetcher.fetch_file_data(Config.openai('prompt_url'))
-        df = pd.read_csv('prompts.csv', sep=',', error_bad_lines=False)
-        for i in df.index:
-            # update global state prompt_templates
-            self.prompt_templates[df.at[i, 'act']] = df.at[i, 'prompt']
-        choices = list(self.prompt_templates.keys())
-        return gr.update(value=choices[0], choices=choices)
 
     def __clear_conversation(self):
         return gr.update(value=None, visible=True), None, '', self.__empty_state()
@@ -134,8 +134,10 @@ class GradioChannel(Channel):
                         total_tokens_str = gr.Markdown(elem_id="total_tokens_str")
                         btn_clear_conversation = gr.Button("🔃 New Conversation")
                     with gr.Column():
+                        choices = list(self.prompt_templates.keys())
                         prompt_choice = gr.Dropdown(label="Set a custom insruction for the chatbot:",
-                                                    choices=list(self.prompt_templates.keys()))
+                                                    value=choices[0],
+                                                    choices=choices)
                         prompt_template_preview = gr.Markdown(elem_id="prompt_template_preview")
                         with gr.Accordion("Advanced parameters", open=False):
                             temperature = gr.Slider(minimum=0, maximum=2.0, value=0.7, step=0.1, interactive=True,
@@ -151,10 +153,9 @@ class GradioChannel(Channel):
                                  [input_message, chat_bot, total_tokens_str, state], queue=False)
             btn_clear_conversation.click(self.__clear_conversation, [], [input_message, chat_bot, total_tokens_str, state])
             prompt_choice.change(self.__on_prompt_template_change, inputs=[prompt_choice], outputs=[prompt_template_preview])
-            demo.load(self.__download_prompt_templates, inputs=None, outputs=[prompt_choice])
         return demo
 
     def startup(self):
         self.demo.launch(
             debug=True, share=False, auth=self.__auth, auth_message='请输入用户名和密码: ',
-            server_name='0.0.0.0', server_port=Config.gradio('server_port'))
+            server_name=Config.gradio('server_name'), server_port=Config.gradio('server_port'))

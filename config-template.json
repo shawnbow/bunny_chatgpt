@@ -26,8 +26,8 @@
     }
   },
   "gradio": {
-    "server_url": "/",
-    "server_port": "80"
+    "server_name": "127.0.0.1",
+    "server_port": 7860
   },
   "openai": {
     "api_key": "YOUR API KEY",
